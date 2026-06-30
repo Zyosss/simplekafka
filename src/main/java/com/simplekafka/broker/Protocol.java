@@ -1,6 +1,6 @@
 package com.simplekafka.broker;
 
-//this class defice how broker and client communicate over the network
+//this class define how broker and client communicate over the network
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -39,4 +39,41 @@ public class Protocol {
         buffer.flip();
         channel.write(buffer);
     }
+
+    /** Encode a Producer Request
+     * */
+     public static ByteBuffer encodeProduceRequest(String topic, int partition,byte[] message){
+
+         /**
+          * We allocate 11 bytes because the ( size of produce_response ) 1 byte+
+          * 2 bytes contain topic string length+
+          * Next 4 bytes contain partition ID +
+          * Next 4 bytes contain message length,
+          * and we add after it
+          * Next N bytes contain the topic name
+          * */
+    ByteBuffer buffer=ByteBuffer.allocate(11+topic.length()+message.length);
+
+         /**
+          * First byte identifies request type (0x01)
+          * Next 2 bytes contain topic string length
+          * Next N bytes contain the topic name
+          * Next 4 bytes contain partition ID
+          * Next 4 bytes contain message length
+          * Remaining bytes contain the message
+          *
+          */
+    buffer.put(PRODUCE_RESPONSE);
+    buffer.putShort((short)topic.length());
+    buffer.put(topic.getBytes());
+    buffer.putInt(partition);
+    buffer.putInt(message.length);
+    buffer.put(message);
+    return buffer;
+
+     }
+
+
+
 }
+
