@@ -272,5 +272,28 @@ public class Protocol {
             return error == null;
         }
     }
+
+    /**
+     * Decode Produce Result
+     */
+
+    public static ProduceResult DecodeProduceResponse(ByteBuffer buffer){
+
+        byte ResponeType=buffer.get();
+        if(ResponeType!=PRODUCE_RESPONSE){
+            if(ResponeType==ERROR_RESPONSE){
+                short errorLength=buffer.getShort();
+                byte[] errorBytes =new byte[errorLength];
+                buffer.get(errorBytes);
+                String error=new String(errorBytes);
+                return new ProduceResult(-1,error);
+            }
+            return new ProduceResult(-1,"Invalid Response type");
+        }
+        long offset=buffer.getLong();
+        byte status=buffer.get();
+        return new ProduceResult(offset,status==0 ? null :"Produce failed");
+    }
+
 }
 
