@@ -99,6 +99,18 @@ public class Protocol {
     /**
      *Encode topic Request
      */
+    public static ByteBuffer encodeCreateTopicRequest(String topic,int numPartitions,short replicationFactor){
+
+        ByteBuffer buffer=ByteBuffer.allocate(9+topic.length());
+        buffer.put(CREATE_TOPIC);
+        buffer.putShort((short)topic.length());
+        buffer.put(topic.getBytes());
+        buffer.putInt(numPartitions);
+        buffer.putShort(replicationFactor);
+        buffer.flip();
+        return buffer;
+
+    }
 
 
 
