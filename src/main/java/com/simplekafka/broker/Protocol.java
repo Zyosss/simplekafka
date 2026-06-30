@@ -112,6 +112,24 @@ public class Protocol {
 
     }
 
+    /**
+     *Encode Replication Request For BACKUP in case of borker is down
+     * */
+
+    public static ByteBuffer encodeReplicateRequest(String topic,int partition,long offset,byte[] message){
+        ByteBuffer buffer=ByteBuffer.allocate(17+topic.length()+message.length);
+        buffer.put(REPLICATE);
+        buffer.putShort((short)topic.length());
+        buffer.put(topic.getBytes());
+        buffer.putInt(partition);
+        buffer.putLong(offset);
+        buffer.putInt(message.length);
+        buffer.put(message);
+        buffer.flip();
+        return buffer;
+
+
+    }
 
 
 }
