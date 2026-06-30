@@ -170,5 +170,30 @@ public class Protocol {
     /**
      * Result class for Fetch
      */
+
+    public static class FetchResult{
+        private final byte[][] messages;
+        private final String error;
+        public FetchResult(byte[][] messages,String error){
+            this.messages=messages;
+            this.error=error;
+        }
+        public byte[][] getMessages(){
+            return messages;
+        }
+        public String getError() {
+            return error;
+        }
+        public int getMessageCount(){
+            return messages.length;
+        }
+        public boolean isSucess(){
+            return error==null;
+        }
+    }
+
+    /**
+     * Result class for Metadata
+     */
 }
 
