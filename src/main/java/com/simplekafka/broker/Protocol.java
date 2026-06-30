@@ -88,7 +88,17 @@ public class Protocol {
         buffer.flip();
         return buffer;
     }
-    
+
+    public static ByteBuffer encodeMetadataRequest(){
+         ByteBuffer buffer=ByteBuffer.allocate(1);
+         buffer.put(METADATA);
+         buffer.flip();
+         return buffer;
+    }
+
+    /**
+     *Encode topic Request
+     */
 
 
 
