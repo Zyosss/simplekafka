@@ -127,8 +127,19 @@ public class Protocol {
         buffer.put(message);
         buffer.flip();
         return buffer;
+    }
 
+    /**
+     * Encode Topic Notification
+     */
 
+    public static ByteBuffer encodeTopicNotification(String topic){
+        ByteBuffer buffer=ByteBuffer.allocate(3+topic.length());
+        buffer.put(TOPIC_NOTIFICATION);
+        buffer.putShort((short)topic.length());
+        buffer.put(topic.getBytes());
+        buffer.flip();
+        return buffer;
     }
 
 
