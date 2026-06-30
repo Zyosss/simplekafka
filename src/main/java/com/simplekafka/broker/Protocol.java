@@ -5,6 +5,7 @@ package com.simplekafka.broker;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.List;
 
 /**
  * Defines the wire protocol for SimpleKafka communication
@@ -193,7 +194,51 @@ public class Protocol {
     }
 
     /**
-     * Result class for Metadata
+     * Metadata class for Partition
      */
+
+    public static class PartitionMetadata{
+        private final int id;
+        private final int leader;
+        private final List<Integer> replicas;
+
+        public PartitionMetadata(int id, int leader, List<Integer> replicas) {
+            this.id = id;
+            this.leader = leader;
+            this.replicas = replicas;
+        }
+
+        public int getId() {
+            return id;
+        }
+        public int getLeader() {
+            return leader;
+        }
+        public List<Integer> getReplicas() {
+            return replicas;
+        }
+
+
+    }
+    /**
+     * Metadata Class for Topic
+     */
+
+    public static class TopicMetadata{
+        private final String name;
+        private final List<PartitionMetadata> partitions;
+
+        public TopicMetadata(String name, List<PartitionMetadata> partitions) {
+            this.name = name;
+            this.partitions = partitions;
+        }
+
+        public String getName() {
+            return name;
+        }
+        public List<PartitionMetadata> getPartitions() {
+            return partitions;
+        }
+    }
 }
 
