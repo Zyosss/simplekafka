@@ -73,6 +73,23 @@ public class Protocol {
 
      }
 
+    /** Encode a Fetch Request
+     * */
+
+    public static ByteBuffer encodeFetchRequest(String topic ,int partition,long offset,int maxBytes){
+
+        ByteBuffer buffer=ByteBuffer.allocate(19+topic.length());
+        buffer.put(FETCH);
+        buffer.putShort((short)topic.length());
+        buffer.put(topic.getBytes());
+        buffer.putInt(partition);
+        buffer.putLong(offset);
+        buffer.putInt(maxBytes);
+        buffer.flip();
+        return buffer;
+    }
+    
+
 
 
 }
