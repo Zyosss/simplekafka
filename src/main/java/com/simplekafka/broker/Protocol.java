@@ -295,5 +295,35 @@ public class Protocol {
         return new ProduceResult(offset,status==0 ? null :"Produce failed");
     }
 
+
+    /**
+     * Decode Fetch Response
+     */
+
+    public static FetchResult DecodeFetchResponse(ByteBuffer buffer){
+
+        byte ResponeType=buffer.get();
+        if(ResponeType!=FETCH_RESPONSE){
+            if(ResponeType==ERROR_RESPONSE){
+                short errorLength=buffer.getShort();
+                byte[] errorBytes = new byte[errorLength];
+                buffer.get(errorBytes);
+                String error=new String(errorBytes);
+                return new FetchResult(new byte[0][],error);
+            }
+            return  new FetchResult(new byte[0][],"Invalid Response type");
+
+        }
+        int messageCount=buffer.getInt();
+        byte[][] messages=new byte[messageCount][];
+        for(int i=0;i<messageCount;i++){
+            long offset =buffer.getLong();
+            int messageSize=buffer.getInt();
+            messages[i]=new byte[messageSize];
+            buffer.get(messages[i]);
+        }
+        return new FetchResult(messages,null);
+    }
+
 }
 
