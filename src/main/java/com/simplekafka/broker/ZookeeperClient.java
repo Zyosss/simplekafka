@@ -1,13 +1,20 @@
 package com.simplekafka.broker;
 
-import org.apache.zookeeper.*;
-import org.apache.zookeeper.data.Stat;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.ZooDefs;
+import org.apache.zookeeper.ZooKeeper;
+import org.apache.zookeeper.data.Stat;
 /**
  * This class is the orchestrator of all broker it does leader election and organize things between brokers
  */
@@ -108,6 +115,80 @@ public class ZookeeperClient implements Watcher {
             logger.info("Ephemeral node already exists"+path);
             return false;
         }
+    }
+
+    /**
+     *Watching child Nodes method
+     */
+    public void watchChildren(String path, ChildrenCallback callback){
+    try{
+        List<String> children=zk.getChildren(path,event ->{
+            if(event.getType()==Watcher.Event.EventType.NodeChildrenChanged){
+                try{
+                    List<String> newChildren=zk.getChildren(path,event2 ->{
+                        if(event2.getType()==Watcher.Event.EventType.NodeChildrenChanged){
+                            watchChildren(path,callback);
+                        }
+                    });
+                    callback.onChildrenChanged(newChildren);
+                }
+                catch (Exception e){
+                    logger.log(Level.SEVERE,"Error processing children changed event "+path,e);
+                }
+            }
+        });
+        callback.onChildrenChanged(children);
+    }
+    catch (Exception e){
+        logger.log(Level.SEVERE,"Failed to wathc children path "+path,e);
+
+    }
+
+    }
+
+    public void watchNode(String path,NodeCallback callback){
+        try{
+            zk.exists(path,event ->{
+                if(event.getType()== Event.EventType.NodeDeleted ||
+                event.getType()== Event.EventType.NodeDataChanged ||
+                event.getType()== Event.EventType.NodeCreated)
+                {callback.onNodeChanged();}
+            });
+        }
+        catch (Exception e){
+            logger.log(Level.SEVERE,"Failed to wathc node: "+path,e);
+
+        }
+
+    }
+
+    public void deleteNode(String path) throws KeeperException, InterruptedException{
+        if(exists(path)){
+            zk.delete(path,-1);
+            logger.info("Delete node "+path);
+
+        }
+
+
+    }
+    public boolean exists(String path) throws KeeperException, InterruptedException{
+        Stat stat=zk.exists(path,false);
+        return stat!=null;
+    }
+
+    /**
+     * Node Callback interface
+     */
+    public interface NodeCallback{
+        void onNodeChanged();
+    }
+
+
+    /**
+     *Children Callback interface
+     */
+    public interface ChildrenCallback{
+        void onChildrenChanged(List<String> children);
     }
 
 
