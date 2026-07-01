@@ -176,6 +176,9 @@ public class ZookeeperClient implements Watcher {
         return stat!=null;
     }
 
+
+
+
     /**
      * Node Callback interface
      */
@@ -191,9 +194,34 @@ public class ZookeeperClient implements Watcher {
         void onChildrenChanged(List<String> children);
     }
 
+    /**
+     * Process Zookeeper events
+     */
 
     @Override
     public void process(WatchedEvent watchedEvent) {
+        if(watchedEvent.getState()==Event.KeeperState.SyncConnected){
+            connectedSignal.countDown();
+            logger.info("Connected to Zookeeper");
+        }
+        else if(watchedEvent.getState()==Event.KeeperState.Disconnected){
+            logger.info("Disconnected from Zookeeper");
+        }
+        else if(watchedEvent.getState()==Event.KeeperState.Expired){
+            logger.info("Zookeeper has been expired");
+            try{
+                if(zk!=null){
+                    zk.close();
+                }
+                connectedSignal=new CountDownLatch(1);
+                zk=new ZooKeeper(getConnectString(),SESSION_TIMEOUT,this);
+                connectedSignal.await();
+                logger.info("Reconnected to Zookeeper");
 
+            }
+            catch(Exception e){
+                logger.log(Level.WARNING,"Failed to reconnect to zookeeper",e);
+            }
+        }
     }
 }
