@@ -90,6 +90,26 @@ public class ZookeeperClient implements Watcher {
         }
     }
 
+    /**
+     * Create Ephemeral Nodes
+     * They exist only while the ZooKeeper session is active
+     * If a broker crashes or disconnects, its ephemeral node disappears
+     * This is how Kafka detects broker failures
+     */
+
+    public boolean createEphemeralNode(String path,String data) throws KeeperException, InterruptedException{
+        Stat stat=zk.exists(path,false);
+        if(stat==null){
+            zk.create(path,data.getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.EPHEMERAL);
+            logger.info("Create ephemeral node "+path);
+            return true;
+        }
+        else {
+            logger.info("Ephemeral node already exists"+path);
+            return false;
+        }
+    }
+
 
     @Override
     public void process(WatchedEvent watchedEvent) {
