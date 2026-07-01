@@ -1,6 +1,7 @@
 package com.simplekafka.broker;
 
 import org.apache.zookeeper.*;
+import org.apache.zookeeper.data.Stat;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
@@ -63,6 +64,30 @@ public class ZookeeperClient implements Watcher {
             logger.log(Level.WARNING,"Failed to create Zookeeper path "+path,e);
         }
 
+    }
+
+    public void close() throws InterruptedException{
+        if(zk!=null){
+            zk.close();
+        }
+    }
+
+    /**
+     *This method stores topic configuration
+     * Saves partitions assignment
+     */
+
+    public void createPersistentNode(String path ,String data) throws KeeperException, InterruptedException{
+
+        Stat stat=zk.exists(path,false);
+        if(stat==null){
+            zk.create(path,data.getBytes(),ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.PERSISTENT);
+            logger.info("Create persistent node "+path);
+        }
+        else{
+            zk.setData(path,data.getBytes(),-1);
+            logger.info("Updated persistent node "+path);
+        }
     }
 
 
