@@ -15,6 +15,7 @@ import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
+
 /**
  * This class is the orchestrator of all broker it does leader election and organize things between brokers
  */
